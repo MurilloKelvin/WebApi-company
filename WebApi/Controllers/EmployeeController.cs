@@ -1,6 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using WebApi.Infrastructure;
 using WebApi.Models;
 
@@ -10,87 +9,107 @@ namespace WebApi.Controllers
     [Route("api/v1/employee")]
     public class EmployeeController : ControllerBase
     {
-
-        private readonly ConnectionDbContext _context;
+        private readonly IEmployeeRepository _employeeRepository;
 
         public EmployeeController(ConnectionDbContext context)
         {
-            _context = context;
+            _employeeRepository = new EmployeeRepository(context);
         }
 
+        [Authorize]
         [HttpPost]
-        public async Task<IActionResult> Add([FromForm] Employee employee)
+        public async Task<IActionResult> Add([FromForm] EmployeeViewModel employeeVm)
         {
-
-            var storagePath = Path.Combine("Storage"); // Define o caminho para a pasta de armazenamento
+            var employee = ToEntity(employeeVm);
+            var storagePath = Path.Combine("Storage");
 
             if (!Directory.Exists(storagePath))
             {
                 Directory.CreateDirectory(storagePath);
             }
 
-            var filePath = Path.Combine(storagePath, employee.Image.FileName); // Define o caminho completo para o arquivo a ser salvo
+            var filePath = Path.Combine(storagePath, employeeVm.Image!.FileName);
 
-            using Stream FileStream = new FileStream(filePath, FileMode.Create); // Cria um FileStream para salvar o arquivo
+            using Stream fileStream = new FileStream(filePath, FileMode.Create);
+            await employeeVm.Image.CopyToAsync(fileStream);
 
-            await employee.Image.CopyToAsync(FileStream); // Copia o conteúdo do arquivo enviado para o FileStream
-            employee.ImagePath = filePath; // Atribui o caminho do arquivo salvo à propriedade ImagePath do funcionário
-
-
-            _context.EMPRESA.Add(employee);
-            await _context.SaveChangesAsync();
+            employee.ImagePath = filePath;
+            await _employeeRepository.AddEmployeeAsync(employee);
 
             return Ok(200);
         }
 
+        [Authorize]
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetEmployee(int id)
         {
-            var employee = await _context.EMPRESA.FindAsync(id); // Busca o funcionário pelo ID usando FindAsync
+            var employee = await _employeeRepository.GetByIdAsync(id);
 
             if (employee == null)
+            {
                 return NotFound("Nao encontrado");
+            }
 
-            return Ok(employee);
+            return Ok(ToViewModel(employee));
         }
 
-
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var employees = await _context.EMPRESA.ToListAsync(); // Busca todos os funcionários usando ToListAsync
-            return Ok(employees);
+            var employees = await _employeeRepository.GetAllEmployeesAsync();
+            return Ok(employees.Select(ToViewModel));
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
-            var employee = await _context.EMPRESA.FindAsync(id);
+            var deleted = await _employeeRepository.DeleteAsync(id);
 
-            if (employee == null)
+            if (!deleted)
+            {
                 return NotFound("Nao encontrado");
-
-            _context.EMPRESA.Remove(employee); // Remove o funcionário do contexto
-            await _context.SaveChangesAsync();
-
+            }
 
             return NoContent();
         }
 
-
+        [Authorize]
         [HttpGet]
         [Route("{id}/download")]
         public async Task<IActionResult> GetImage(int id)
         {
-            var employee = await _context.EMPRESA.FindAsync(id);
+            var employee = await _employeeRepository.GetByIdAsync(id);
 
             if (employee == null)
+            {
                 return NotFound("Nao encontrado");
+            }
 
-            var dataBytes = System.IO.File.ReadAllBytes(employee.ImagePath); // Lê o conteúdo do arquivo de imagem como um array de bytes
-
-            return File(dataBytes, "image/png"); // Retorna o arquivo de imagem 
+            var dataBytes = System.IO.File.ReadAllBytes(employee.ImagePath!);
+            return File(dataBytes, "image/png");
         }
 
-    } 
+        private static EmployeeResponseViewModel ToViewModel(Employee employee)
+        {
+            return new EmployeeResponseViewModel
+            {
+                Id = employee.Id,
+                Name = employee.Name,
+                Age = employee.Age,
+                ImagePath = employee.ImagePath
+            };
+        }
+
+        private static Employee ToEntity(EmployeeViewModel employeeVm)
+        {
+            return new Employee
+            {
+                Name = employeeVm.Name,
+                Age = employeeVm.Age,
+                Image = employeeVm.Image
+            };
+        }
+    }
 }

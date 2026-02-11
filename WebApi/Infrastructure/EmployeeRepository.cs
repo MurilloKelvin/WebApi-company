@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Microsoft.EntityFrameworkCore;
 using WebApi.Models;
 
 namespace WebApi.Infrastructure
@@ -12,15 +12,34 @@ namespace WebApi.Infrastructure
             _context = context;
         }
 
-        public void AddEmployee(Employee employee)
+        public async Task AddEmployeeAsync(Employee employee)
         {
             _context.EMPRESA.Add(employee);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public List<Employee> GetAllEmployees()
+        public Task<Employee?> GetByIdAsync(int id)
         {
-            return _context.EMPRESA.ToList();
+            return _context.EMPRESA.FindAsync(id).AsTask();
+        }
+
+        public Task<List<Employee>> GetAllEmployeesAsync()
+        {
+            return _context.EMPRESA.ToListAsync();
+        }
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var employee = await _context.EMPRESA.FindAsync(id);
+
+            if (employee == null)
+            {
+                return false;
+            }
+
+            _context.EMPRESA.Remove(employee);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

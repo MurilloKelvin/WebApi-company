@@ -2,10 +2,9 @@
 {
     public interface IEmployeeRepository
     {
-        void AddEmployee(Employee employee);
-
-        List<Employee>  GetAllEmployees();
-
-        void Delete(int Id);
+        Task AddEmployeeAsync(Employee employee);
+        Task<Employee?> GetByIdAsync(int id);
+        Task<List<Employee>> GetAllEmployeesAsync();
+        Task<bool> DeleteAsync(int id);
     }
 }

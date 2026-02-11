@@ -14,9 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="Infrastructure\EmployeeRepository.cs" />
     <Compile Remove="Models\EmployeeResponse.cs" />
-    <Compile Remove="Models\IEmployeeRepository.cs" />
   </ItemGroup>
 
   <ItemGroup>
