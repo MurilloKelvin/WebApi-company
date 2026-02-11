@@ -64,6 +64,8 @@ namespace WebApi.Controllers
 
             _logger.LogInformation("Teste");
 
+           // throw new Exception("Teste de erro");
+
             return Ok(employees.Select(ToViewModel));
         }
 
