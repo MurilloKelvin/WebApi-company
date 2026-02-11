@@ -52,6 +52,8 @@ var connectionString = builder.Configuration.GetConnectionString("AppDbConnectio
 builder.Services.AddDbContext<ConnectionDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))); // Configura o DbContext para usar MySQL, detectando automaticamente a versão do servidor com base na string de conexão
 
+builder.Services.AddTransient<IEmployeeRepository, EmployeeRepository>(); // Registra o repositório para injeção de dependência
+
 var key = Encoding.ASCII.GetBytes(Key.Secret); // Converte a chave secreta para bytes, usada para a assinatura do token JWT
 
 builder.Services.AddAuthentication(x =>

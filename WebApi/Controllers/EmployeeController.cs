@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using WebApi.Infrastructure;
 using WebApi.Models;
 
@@ -10,10 +11,12 @@ namespace WebApi.Controllers
     public class EmployeeController : ControllerBase
     {
         private readonly IEmployeeRepository _employeeRepository;
+        private readonly ILogger<EmployeeController> _logger;
 
-        public EmployeeController(ConnectionDbContext context)
+        public EmployeeController(IEmployeeRepository employeeRepository, ILogger<EmployeeController> logger)
         {
-            _employeeRepository = new EmployeeRepository(context);
+            _employeeRepository = employeeRepository;
+            _logger = logger;
         }
 
         [Authorize]
@@ -36,10 +39,11 @@ namespace WebApi.Controllers
             employee.ImagePath = filePath;
             await _employeeRepository.AddEmployeeAsync(employee);
 
+
+            _logger.LogInformation("Employee {Name} added successfully.", employee.Name);
             return Ok(200);
         }
 
-        [Authorize]
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetEmployee(int id)
         {
@@ -53,11 +57,13 @@ namespace WebApi.Controllers
             return Ok(ToViewModel(employee));
         }
 
-        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var employees = await _employeeRepository.GetAllEmployeesAsync();
+
+            _logger.LogInformation("Teste");
+
             return Ok(employees.Select(ToViewModel));
         }
 
@@ -72,6 +78,7 @@ namespace WebApi.Controllers
                 return NotFound("Nao encontrado");
             }
 
+            _logger.LogInformation("Employee with ID {Id} deleted successfully.", id);
             return NoContent();
         }
 
@@ -88,6 +95,8 @@ namespace WebApi.Controllers
             }
 
             var dataBytes = System.IO.File.ReadAllBytes(employee.ImagePath!);
+
+            _logger.LogInformation("Image for Employee with ID {Id} retrieved successfully.", id);
             return File(dataBytes, "image/png");
         }
 
