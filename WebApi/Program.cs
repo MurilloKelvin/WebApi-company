@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using WebApi;
@@ -9,6 +8,11 @@ using WebApi.Infrastructure.Repositories;
 using WebApi.Application.Mapping;
 using WebApi.Domain.Models.EmployeesAggregate;
 using WebApi.Infrastructure;
+using Microsoft.AspNetCore.Mvc;
+using WebApi.Application.Swagger;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,11 +20,25 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddAutoMapper(typeof(DomainToDTOMapping)); // Registra o AutoMapper e especifica a classe de mapeamento do employee
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddApiVersioning(o => // Configura a versionamento da API
+{
+    o.AssumeDefaultVersionWhenUnspecified = true; // Assume a versão padrão quando nenhuma versão é especificada na requisição
+    o.DefaultApiVersion = new ApiVersion(1, 0); // Define a versão padrão como 1.0
+}); 
+
+builder.Services.AddVersionedApiExplorer(o => // Configura o explorador de API versionada para gerar documentação específica para cada versão
+{
+    o.GroupNameFormat = "'v'VVV"; // Define o formato do nome do grupo de versões (ex: v1, v2)
+    o.SubstituteApiVersionInUrl = true; // Substitui a versão na URL da documentação
+});
 
 builder.Services.AddSwaggerGen(c =>
 {
+    c.OperationFilter<SwaggerDefaultValues>(); // Adiciona um filtro para definir valores padrão na documentação Swagger
+
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -55,7 +73,23 @@ var connectionString = builder.Configuration.GetConnectionString("AppDbConnectio
 builder.Services.AddDbContext<ConnectionDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))); // Configura o DbContext para usar MySQL, detectando automaticamente a versão do servidor com base na string de conexão
 
+
+
 builder.Services.AddTransient<IEmployeeRepository, EmployeeRepository>(); // Registra o repositório para injeção de dependência
+builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerGenOptions>(); // Registra a configuração personalizada para o Swagger
+
+// Configura o CORS para permitir solicitações de qualquer origem, método e cabeçalho, facilitando o desenvolvimento e testes da API
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: "MyPolicy",
+        policy =>
+        {
+            policy.AllowAnyOrigin() // Permite solicitações de qualquer origem
+                  .AllowAnyMethod() // Permite qualquer método HTTP (GET, POST, etc.)
+                  .AllowAnyHeader(); // Permite qualquer cabeçalho
+        });
+});
+
 
 var key = Encoding.ASCII.GetBytes(Key.Secret); // Converte a chave secreta para bytes, usada para a assinatura do token JWT
 
@@ -77,20 +111,29 @@ builder.Services.AddAuthentication(x =>
 });
 
 var app = builder.Build();
+var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>(); // Obtém o provedor de descrição de versão da API para configurar o Swagger
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/error-development"); // usa o manipulador de exceções para desenvolvimento
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        foreach (var description in provider.ApiVersionDescriptions) // Itera sobre as descrições de versão da API para configurar os endpoints do Swagger para cada versão
+        {
+            options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", // Define o endpoint do Swagger para cada versão da API, usando o nome do grupo de versão como parte da URL e do título
+                $"Web API - {description.GroupName.ToUpperInvariant()}");
+        }
+    });
 
 }else 
 {
     app.UseExceptionHandler("/error"); // usa o manipulador de exceções para produção
     app.UseHsts();
 }
-
+app.UseCors("MyPolicy"); // Aplica a política de CORS definida anteriormente para permitir solicitações de qualquer origem, método e cabeçalho
 app.UseHttpsRedirection();
 
 app.UseAuthentication();

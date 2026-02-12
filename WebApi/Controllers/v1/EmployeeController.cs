@@ -6,10 +6,11 @@ using WebApi.Domain.DTO;
 using static WebApi.Domain.DTO.EmployeeDTO;
 using AutoMapper;
 using WebApi.Domain.Models.EmployeesAggregate;
-namespace WebApi.Controllers
+namespace WebApi.Controllers.v1
 {
     [ApiController]
-    [Route("api/v1/employee")]
+    [Route("api/v{version:apiVersion}/employee")] // Define a rota da API com versionamento
+    [ApiVersion("1.0")] 
     public class EmployeeController : ControllerBase
     {
         private readonly IEmployeeRepository _employeeRepository;
