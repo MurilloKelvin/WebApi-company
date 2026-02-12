@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using WebApi.Infrastructure;
-using WebApi.Models;
-
+using WebApi.Application.ViewModel;
+using WebApi.Domain.DTO;
+using static WebApi.Domain.DTO.EmployeeDTO;
+using AutoMapper;
+using WebApi.Domain.Models.EmployeesAggregate;
 namespace WebApi.Controllers
 {
     [ApiController]
@@ -12,18 +14,20 @@ namespace WebApi.Controllers
     {
         private readonly IEmployeeRepository _employeeRepository;
         private readonly ILogger<EmployeeController> _logger;
+        private readonly IMapper _mapper;
 
-        public EmployeeController(IEmployeeRepository employeeRepository, ILogger<EmployeeController> logger)
+        public EmployeeController(IEmployeeRepository employeeRepository, ILogger<EmployeeController> logger, IMapper mapper)
         {
             _employeeRepository = employeeRepository;
             _logger = logger;
+            _mapper = mapper;
         }
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> Add([FromForm] EmployeeViewModel employeeVm)
+        public async Task<IActionResult> Add([FromForm] EmployeeViewModel employeeDTO)
         {
-            var employee = ToEntity(employeeVm);
+            var employee = _mapper.Map<Employee>(employeeDTO); // Usa o AutoMapper para mapear o EmployeeViewModel para a entidade Employee
             var storagePath = Path.Combine("Storage");
 
             if (!Directory.Exists(storagePath))
@@ -31,13 +35,13 @@ namespace WebApi.Controllers
                 Directory.CreateDirectory(storagePath);
             }
 
-            var filePath = Path.Combine(storagePath, employeeVm.Image!.FileName);
+            var filePath = Path.Combine(storagePath, employeeDTO.Image!.FileName); // Gera o caminho completo para salvar a imagem
 
-            using Stream fileStream = new FileStream(filePath, FileMode.Create);
-            await employeeVm.Image.CopyToAsync(fileStream);
+            using Stream fileStream = new FileStream(filePath, FileMode.Create); // Cria um stream para salvar a imagem
+            await employeeDTO.Image.CopyToAsync(fileStream); // Copia o conteúdo do arquivo de imagem para o stream
 
-            employee.ImagePath = filePath;
-            await _employeeRepository.AddEmployeeAsync(employee);
+            employee.Photo = filePath; // Armazena o caminho da imagem no banco de dados
+            await _employeeRepository.AddEmployeeAsync(employee); // Salva o funcionário no banco de dados
 
 
             _logger.LogInformation("Employee {Name} added successfully.", employee.Name);
@@ -50,11 +54,11 @@ namespace WebApi.Controllers
             var employee = await _employeeRepository.GetByIdAsync(id);
 
             if (employee == null)
-            {
                 return NotFound("Nao encontrado");
-            }
 
-            return Ok(ToViewModel(employee));
+            var employeeDTO = _mapper.Map<EmployeeResponseDTO>(employee); // Usa o AutoMapper para mapear a entidade Employee para EmployeeResponseDTO
+
+            return Ok(employeeDTO);
         }
 
         [HttpGet]
@@ -62,11 +66,11 @@ namespace WebApi.Controllers
         {
             var employees = await _employeeRepository.GetAllEmployeesAsync();
 
-            _logger.LogInformation("Teste");
+            var employeesDTO = _mapper.Map<List<EmployeeResponseDTO>>(employees); // Usa o AutoMapper para mapear a lista de entidades Employee para uma lista de EmployeeResponseDTO
 
            // throw new Exception("Teste de erro");
 
-            return Ok(employees.Select(ToViewModel));
+            return Ok(employeesDTO); // pega cada employee da lista e converte para EmployeeResponseDTO usando o método ToViewModel (select é um método de extensão do LINQ que projeta cada elemento de uma sequência em um novo formato)
         }
 
         [Authorize]
@@ -96,31 +100,12 @@ namespace WebApi.Controllers
                 return NotFound("Nao encontrado");
             }
 
-            var dataBytes = System.IO.File.ReadAllBytes(employee.ImagePath!);
+            var dataBytes = System.IO.File.ReadAllBytes(employee.Photo!); // Lê os bytes do arquivo de imagem 
 
             _logger.LogInformation("Image for Employee with ID {Id} retrieved successfully.", id);
-            return File(dataBytes, "image/png");
+            return File(dataBytes, "image/png"); // Retorna a imagem como um arquivo para download
         }
 
-        private static EmployeeResponseViewModel ToViewModel(Employee employee)
-        {
-            return new EmployeeResponseViewModel
-            {
-                Id = employee.Id,
-                Name = employee.Name,
-                Age = employee.Age,
-                ImagePath = employee.ImagePath
-            };
-        }
 
-        private static Employee ToEntity(EmployeeViewModel employeeVm)
-        {
-            return new Employee
-            {
-                Name = employeeVm.Name,
-                Age = employeeVm.Age,
-                Image = employeeVm.Image
-            };
-        }
     }
 }

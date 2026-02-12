@@ -11,8 +11,8 @@ using WebApi.Infrastructure;
 namespace WebApi.Migrations
 {
     [DbContext(typeof(ConnectionDbContext))]
-    [Migration("20260210003234_initial4")]
-    partial class initial4
+    [Migration("20260212214140_teste")]
+    partial class teste
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -22,7 +22,7 @@ namespace WebApi.Migrations
                 .HasAnnotation("ProductVersion", "8.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            modelBuilder.Entity("WebApi.Models.Employee", b =>
+            modelBuilder.Entity("WebApi.Domain.Models.Employee", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -34,6 +34,10 @@ namespace WebApi.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("longtext");
+
+                    b.Property<string>("Photo")
+                        .HasColumnType("longtext")
+                        .HasColumnName("ImagePath");
 
                     b.HasKey("Id");
 

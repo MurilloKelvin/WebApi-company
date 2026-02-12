@@ -1,9 +1,9 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
-using WebApi.Models;
+using WebApi.Domain.Models.EmployeesAggregate;
 
-namespace WebApi.Services
+namespace WebApi.Application.Services
 {
     public class TokenService
     {
@@ -12,7 +12,7 @@ namespace WebApi.Services
             var key = Encoding.ASCII.GetBytes(Key.Secret); // converte a chave secreta para bytes
             var tokenConfig = new SecurityTokenDescriptor //cria um objeto com as configurações do token "quem e o usuario"
             {
-                Subject = new System.Security.Claims.ClaimsIdentity(new Claim[] // informações que serão incluídas no token
+                Subject = new ClaimsIdentity(new Claim[] // informações que serão incluídas no token
                 {
                     new Claim("employeeId", employee.Id.ToString()), // id do funcionário
                 }),

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography.X509Certificates;
-using WebApi.Models;
+using WebApi.Domain.Models.EmployeesAggregate;
 
 namespace WebApi.Infrastructure
 {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using WebApi.Models;
+using WebApi.Domain.Models.EmployeesAggregate;
 
-namespace WebApi.Infrastructure
+namespace WebApi.Infrastructure.Repositories
 {
     public class EmployeeRepository : IEmployeeRepository
     {

@@ -1,16 +1,19 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using WebApi.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using WebApi.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using WebApi;
+using WebApi.Infrastructure.Repositories;
+using WebApi.Application.Mapping;
+using WebApi.Domain.Models.EmployeesAggregate;
+using WebApi.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+
+builder.Services.AddAutoMapper(typeof(DomainToDTOMapping)); // Registra o AutoMapper e especifica a classe de mapeamento do employee
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
