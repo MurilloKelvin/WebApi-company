@@ -6,7 +6,6 @@ using System.Text;
 using WebApi;
 using WebApi.Infrastructure.Repositories;
 using WebApi.Application.Mapping;
-using WebApi.Domain.Models.EmployeesAggregate;
 using WebApi.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Application.Swagger;
@@ -74,7 +73,7 @@ builder.Services.AddDbContext<ConnectionDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))); // Configura o DbContext para usar MySQL, detectando automaticamente a versão do servidor com base na string de conexão
 
 
-
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddTransient<IEmployeeRepository, EmployeeRepository>(); // Registra o repositório para injeção de dependência
 builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerGenOptions>(); // Registra a configuração personalizada para o Swagger
 
