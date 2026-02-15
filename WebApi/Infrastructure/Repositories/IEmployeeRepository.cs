@@ -1,4 +1,6 @@
-﻿namespace WebApi.Domain.Models.EmployeesAggregate
+﻿using WebApi.Domain.Models.EmployeesAggregate;
+
+namespace WebApi.Infrastructure.Repositories
 {
     public interface IEmployeeRepository
     {
