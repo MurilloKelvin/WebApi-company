@@ -37,7 +37,9 @@ namespace WebApi.Infrastructure.Repositories
 
         public async Task<User?> GetUserByEmailAsync(string email)
         {
-            var user = await _context.USERS.FirstOrDefaultAsync(user => user.Email == email);
+            var user = await _context.USERS
+                .Include(u => u.Employees)
+                .FirstOrDefaultAsync(user => user.Email == email);
 
             if (user == null)
                 return null;
@@ -47,7 +49,9 @@ namespace WebApi.Infrastructure.Repositories
 
         public async Task<User?> GetUserByIdAsync(int id)
         {
-            var user = await _context.USERS.FindAsync(id);
+            var user = await _context.USERS
+                .Include(u => u.Employees)
+                .FirstOrDefaultAsync(user => user.Id == id);
 
             if (user == null)
                 return null;
@@ -57,7 +61,9 @@ namespace WebApi.Infrastructure.Repositories
 
         public async Task<User?> GetUsernameAsync(string username)
         {
-            var user = await _context.USERS.FirstOrDefaultAsync(user => user.Username == username);
+            var user = await _context.USERS
+                .Include(u => u.Employees)
+                .FirstOrDefaultAsync(user => user.Username == username);
 
             if (user == null)
                 return null;

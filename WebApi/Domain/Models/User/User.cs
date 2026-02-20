@@ -15,6 +15,6 @@ namespace WebApi.Domain.Models
         public DateTime? LastLogin { get; set; }
         public bool IsActive { get; set; } = true;
 
-        public Employee Employee { get; set; } // referência para o empregado associado ao usuário
+        public List<Employee>? Employees { get; set; } // referência para o empregado associado ao usuário
     }
 }

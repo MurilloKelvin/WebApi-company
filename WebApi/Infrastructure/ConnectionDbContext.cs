@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography.X509Certificates;
 using WebApi.Domain.Models.EmployeesAggregate;
 using WebApi.Domain.Models;
 
@@ -18,8 +17,8 @@ namespace WebApi.Infrastructure
             {
             modelBuilder.Entity<Employee>()
              .HasOne(e => e.User)
-             .WithOne(u => u.Employee)
-             .HasForeignKey<Employee>(f => f.UserId);
+             .WithMany(u => u.Employees)
+             .HasForeignKey(e => e.UserId);
         }
 
     }

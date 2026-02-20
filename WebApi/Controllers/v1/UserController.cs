@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Application.ViewModel;
+using WebApi.Domain.DTO;
 using WebApi.Domain.Models;
 using WebApi.Infrastructure.Repositories;
 
@@ -38,12 +39,11 @@ namespace WebApi.Controllers.v1
         {
             var user = await _userRepository.GetUserByIdAsync(id);
 
-            var userDTO = _mapper.Map<UserViewModel>(user); // Usa o AutoMapper para mapear a entidade User para UserViewModel
-
             if (user == null)
                 return NotFound("Nao encontrado");
 
-            return Ok(user);
+            var userDTO = _mapper.Map<UserResponseDTO>(user);
+            return Ok(userDTO);
 
         }
 
@@ -52,11 +52,10 @@ namespace WebApi.Controllers.v1
         {
             var user = await _userRepository.GetUserByEmailAsync(email);
 
-            var userDTO = _mapper.Map<UserViewModel>(user); // Usa o AutoMapper para mapear a entidade User para UserViewModel
-
             if (user == null)
                 return NotFound("Nao encontrado");
 
+            var userDTO = _mapper.Map<UserResponseDTO>(user);
             return Ok(userDTO);
         }
 
@@ -65,11 +64,10 @@ namespace WebApi.Controllers.v1
         {
             var user = await _userRepository.GetUsernameAsync(username);
 
-            var userDTO = _mapper.Map<UserViewModel>(user); // Usa o AutoMapper para mapear a entidade User para UserViewModel
-
             if (user == null)
                 return NotFound("Nao encontrado");
 
+            var userDTO = _mapper.Map<UserResponseDTO>(user);
             return Ok(userDTO);
         }
 
