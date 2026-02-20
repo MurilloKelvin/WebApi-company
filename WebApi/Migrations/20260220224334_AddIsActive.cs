@@ -5,25 +5,25 @@
 namespace WebApi.Migrations
 {
     /// <inheritdoc />
-    public partial class image2 : Migration
+    public partial class AddIsActive : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "ImagePath",
-                table: "EMPRESA",
-                type: "longtext",
-                nullable: true)
-                .Annotation("MySql:CharSet", "utf8mb4");
+            migrationBuilder.AddColumn<bool>(
+                name: "isActive",
+                table: "Employees",
+                type: "tinyint(1)",
+                nullable: false,
+                defaultValue: false);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "ImagePath",
-                table: "EMPRESA");
+                name: "isActive",
+                table: "Employees");
         }
     }
 }

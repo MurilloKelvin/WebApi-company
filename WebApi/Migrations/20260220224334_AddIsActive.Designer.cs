@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApi.Infrastructure;
 
@@ -10,9 +11,11 @@ using WebApi.Infrastructure;
 namespace WebApi.Migrations
 {
     [DbContext(typeof(ConnectionDbContext))]
-    partial class ConnectionDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260220224334_AddIsActive")]
+    partial class AddIsActive
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
