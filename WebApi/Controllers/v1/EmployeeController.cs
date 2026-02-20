@@ -108,6 +108,31 @@ namespace WebApi.Controllers.v1
             return File(dataBytes, "image/png"); // Retorna a imagem como um arquivo para download
         }
 
+        [Authorize]
+        [HttpPatch("{id:int}/deactivate")]
+        public async Task<IActionResult> Deactivate(int id)
+        {
+            var deactivated = await _employeeRepository.DesactivateIdAsync(id);
+
+            if (!deactivated)
+                return NotFound("Nao encontrado");
+
+            _logger.LogInformation("Employee with ID {Id} deactivated successfully.", id);
+            return NoContent();
+        }
+
+        [Authorize]
+        [HttpPatch("{id:int}/activate")]
+        public async Task<IActionResult> Activate(int id)
+        {
+            var activated = await _employeeRepository.ActivateIdAsync(id);
+
+            if (!activated)
+                return NotFound("Nao encontrado");
+
+            _logger.LogInformation("Employee with ID {Id} activated successfully.", id);
+            return NoContent();
+        }
 
     }
 }

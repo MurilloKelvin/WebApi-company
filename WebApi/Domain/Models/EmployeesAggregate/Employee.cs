@@ -10,13 +10,14 @@ namespace WebApi.Domain.Models.EmployeesAggregate
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public int Age { get; set; }
+        public bool isActive { get; set; } = true; // campo para indicar se o empregado está ativo ou inativo
 
         [Column("ImagePath")]
         public string? Photo { get; set; } // caminho da imagem salva no disco
 
         public int? UserId { get; set; } // chave estrangeira para a tabela de usuários
 
-        public User User { get; set; } // referência para o usuário associado ao empregado
+        public User? User { get; set; } // referência para o usuário associado ao empregado
 
 
         public Employee()
