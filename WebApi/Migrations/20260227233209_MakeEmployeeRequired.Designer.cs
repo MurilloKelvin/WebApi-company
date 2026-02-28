@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApi.Infrastructure;
 
@@ -10,9 +11,11 @@ using WebApi.Infrastructure;
 namespace WebApi.Migrations
 {
     [DbContext(typeof(ConnectionDbContext))]
-    partial class ConnectionDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260227233209_MakeEmployeeRequired")]
+    partial class MakeEmployeeRequired
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -36,7 +39,8 @@ namespace WebApi.Migrations
                         .HasColumnType("longtext")
                         .HasColumnName("ImagePath");
 
-                    b.Property<int>("UserId")
+                    b.Property<int?>("UserId")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<bool>("isActive")
@@ -54,10 +58,6 @@ namespace WebApi.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    b.Property<string>("CompanyName")
-                        .IsRequired()
-                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");

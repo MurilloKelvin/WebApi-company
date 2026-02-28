@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using WebApi.Domain.Models;
 
 namespace WebApi.Domain.Models.EmployeesAggregate
 {
@@ -15,9 +14,11 @@ namespace WebApi.Domain.Models.EmployeesAggregate
         [Column("ImagePath")]
         public string? Photo { get; set; } // caminho da imagem salva no disco
 
-        public int? UserId { get; set; } // chave estrangeira para a tabela de usuários
+        public int UserId { get; set; } // chave estrangeira para a tabela de usuários
 
-        public User? User { get; set; } // referência para o usuário associado ao empregado
+        public User User { get; set; } = null!; // referência para o usuário associado ao empregado inicia null para evitar problemas de referência circular
+
+
 
 
         public Employee()

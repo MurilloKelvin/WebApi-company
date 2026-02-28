@@ -16,9 +16,10 @@ namespace WebApi.Infrastructure
             protected override void OnModelCreating(ModelBuilder modelBuilder)
             {
             modelBuilder.Entity<Employee>()
-             .HasOne(e => e.User)
-             .WithMany(u => u.Employees)
-             .HasForeignKey(e => e.UserId);
+             .HasOne(e => e.User) // Configura a relação entre Employee e User, indicando que um empregado tem um usuário associado
+             .WithMany(u => u.Employees) // Configura a relação entre Employee e User, indicando que um usuário pode ter muitos empregados
+             .HasForeignKey(e => e.UserId) // Configura a chave estrangeira para a relação entre Employee e User
+             .IsRequired(); // Configura a relação entre Employee e User, garantindo que cada empregado esteja associado a um usuário existente
         }
 
     }

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Application.ViewModel;
 using WebApi.Domain.DTO;
@@ -23,6 +24,7 @@ namespace WebApi.Controllers.v1
             _mapper = mapper;
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] UserViewModel userDTO)
         {
@@ -31,9 +33,10 @@ namespace WebApi.Controllers.v1
 
             _logger.LogInformation("User {Username} added successfully.", user.Username);
 
-            return Ok(200);
+            return Created();
         }
 
+        [Authorize]
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetUserById(int id)
         {
@@ -47,6 +50,7 @@ namespace WebApi.Controllers.v1
 
         }
 
+        [Authorize]
         [HttpGet("{email}")]
         public async Task<IActionResult> GetUserByEmail(string email)
         {
@@ -59,6 +63,7 @@ namespace WebApi.Controllers.v1
             return Ok(userDTO);
         }
 
+        [Authorize]
         [HttpGet("username/{username}")]
         public async Task<IActionResult> GetUserByUsername(string username)
         {
@@ -71,6 +76,7 @@ namespace WebApi.Controllers.v1
             return Ok(userDTO);
         }
 
+        [Authorize]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteUserById(int id)
         {
@@ -83,6 +89,7 @@ namespace WebApi.Controllers.v1
             return Ok("User deletado com sucesso");
         }
 
+        [Authorize]
         [HttpPut]
         public async Task<IActionResult> UpdateUser([FromBody] UserViewModel user)
         {

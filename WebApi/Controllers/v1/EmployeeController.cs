@@ -47,9 +47,10 @@ namespace WebApi.Controllers.v1
 
 
             _logger.LogInformation("Employee {Name} added successfully.", employee.Name);
-            return Ok(200);
+            return Created();
         }
 
+        [Authorize]
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetEmployee(int id)
         {
@@ -63,6 +64,7 @@ namespace WebApi.Controllers.v1
             return Ok(employeeDTO);
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
