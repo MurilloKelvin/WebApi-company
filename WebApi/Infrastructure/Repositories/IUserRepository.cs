@@ -11,6 +11,6 @@ namespace WebApi.Infrastructure.Repositories
         Task<User?> GetUsernameAsync(string username);
         Task<User> AddUserAsync(User user);
         Task<bool> DeleteUserAsync(int userId);
-        Task<bool> UpdateUserAsync(UserViewModel userDTO);
+        Task<bool> UpdateUserAsync(User userDTO);
     }
 }

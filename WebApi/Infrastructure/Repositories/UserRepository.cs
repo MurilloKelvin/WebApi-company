@@ -71,7 +71,7 @@ namespace WebApi.Infrastructure.Repositories
             return user;
         }
 
-        public async Task<bool> UpdateUserAsync(UserViewModel updatedUser)
+        public async Task<bool> UpdateUserAsync(User updatedUser)
         {
             var user = await _context.USERS.FindAsync(updatedUser.Id);
 

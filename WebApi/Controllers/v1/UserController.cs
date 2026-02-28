@@ -24,11 +24,15 @@ namespace WebApi.Controllers.v1
             _mapper = mapper;
         }
 
-        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] UserViewModel userDTO)
         {
             var user = _mapper.Map<User>(userDTO); // Usa o AutoMapper para mapear o UserViewModel para a entidade User
+
+            var h = BCrypt.Net.BCrypt.HashPassword(userDTO.Password); // Gera o hash da senha usando BCrypt
+            user.PasswordHash = h; // Armazena o hash da senha na propriedade PasswordHash da entidade User
+
+
             await _userRepository.AddUserAsync(user); // Salva o usuário no banco de dados
 
             _logger.LogInformation("User {Username} added successfully.", user.Username);
@@ -94,14 +98,26 @@ namespace WebApi.Controllers.v1
         public async Task<IActionResult> UpdateUser([FromBody] UserViewModel user)
         {
             var userExists = await _userRepository.GetUserByIdAsync(user.Id); // Verifica se o usuário existe no banco de dados
-            var userDTO = _mapper.Map<UserViewModel>(user); // Usa o AutoMapper para mapear o UserViewModel para a entidade User
-
-            var result = await _userRepository.UpdateUserAsync(userDTO); // Atualiza o usuário no banco de dados
-
-            if (!result)
+            if (userExists == null)
                 return NotFound("Nao encontrado");
+
+            userExists.Username = user.Username;
+            userExists.Email = user.Email;
+            userExists.CompanyName = user.CompanyName;
+            userExists.Role = user.Role;
+            userExists.IsActive = user.IsActive;
+
+            if(!string.IsNullOrEmpty(user.Password))
+            {
+                userExists.PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.Password); // Gera o hash da nova senha usando BCrypt
+            }
+
+            var result = await _userRepository.UpdateUserAsync(userExists); // Atualiza o usuário no banco de dados
+            if (!result)
+                return StatusCode(500, "Erro ao atualizar o usuário");
+
             _logger.LogInformation("User {Username} updated successfully.", user.Username);
-            return Ok(200);
+            return Ok(201);
         }
 
 
